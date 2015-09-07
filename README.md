@@ -37,6 +37,9 @@ MYSQL data*
 
 Particulars:
 
+For MySQL you need to rehash your MySQL password, and feed the script the hashed password, see:
+http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script
+
 See for variable names of the FR Y-9C forms:
 http://www.federalreserve.gov/apps/mdrm/data-dictionary
 
