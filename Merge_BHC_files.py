@@ -239,7 +239,7 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, vars_in_file, filesf
 	print "\nDone!"
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description='Convert BHC files to verious formats.')
+	parser = argparse.ArgumentParser(description='Convert BHC files to various formats.')
 	parser.add_argument('--pad', 			dest='pad', 										help='Set path of your files.')
 	parser.add_argument('--bank_out_file', 	dest='bank_out_file', 	default='banks.csv',		help='Set file name for banks output file. Enter 0 if not required. Default is "banks.csv".')
 	parser.add_argument('--var_out_file', 	dest='var_out_file', 	default='variables.csv',	help='Set file name for variables output file. Enter 0 if not required. Default is "variables.csv".')
@@ -249,7 +249,7 @@ if __name__ == '__main__':
 	parser.add_argument('--statafile', 		dest='statafile', 		default='panelfile.dta',	help='Set file name for stata output. Enter 0 if not required. Default is "panelfile.dta".')
 	parser.add_argument('--add2db', 		dest='add2db', 			default= 0,					help='Tell me if to output to mysql (1=yes, 2=no). Default  is "0".')
 	parser.add_argument('--user', 			dest='user', 			default='root', 			help='The MySQL login username. Default is "root".')
-	parser.add_argument('--password', 		dest='password', 		default='',	help='The MySQL hashed login password, see http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script')
+	parser.add_argument('--password', 		dest='password', 		default='',					help='The MySQL hashed login password, see http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script')
 	parser.add_argument('--host', 			dest='host', 			default='localhost', 		help='The MySQL host. Default is "localhost".')
 	args = parser.parse_args(sys.argv[1:])
 	if not args.pad:
