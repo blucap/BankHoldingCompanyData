@@ -23,9 +23,13 @@ The python script uses two input files:
 OUTPUTS:
 The python script produces various outputs:
 banks.csv *
+
 variables.csv *
+
 panelfile. csv
+
 panelfile.dta (for STATA) *
+
 MYSQL data *
 
 * These you can elect to switch off, see below.
