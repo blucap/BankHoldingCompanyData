@@ -22,17 +22,18 @@ The python script uses two input files:
 
 OUTPUTS:
 The python script produces various outputs:
-banks.csv *
-
-variables.csv *
 
 panelfile. csv
 
-panelfile.dta (for STATA) *
+banks.csv*
 
-MYSQL data *
+variables.csv*
 
-* These you can elect to switch off, see below.
+panelfile.dta (for STATA)*
+
+MYSQL data*
+
+*These you can elect to switch off, see below.
 
 Particulars:
 
@@ -47,40 +48,36 @@ Else you can specify your own settings.
 
 NOTE: the default is not to send data to MySql.
 
-usage: Merge_BHC_files.py [-h] [--pad PAD] [--bank_out_file BANK_OUT_FILE]
-                          [--var_out_file VAR_OUT_FILE]
-                          [--panelfile PANELFILE]
-                          [--vars_in_file VARS_IN_FILE]
-                          [--filesfile FILESFILE] [--statafile STATAFILE]
-                          [--add2db ADD2DB] [--user USER]
-                          [--password PASSWORD] [--host HOST]
+USAGE: 
+
+Merge_BHC_files.py [-h] [--pad PAD] [--bank_out_file BANK_OUT_FILE] [--var_out_file VAR_OUT_FILE] [--panelfile PANELFILE] [--vars_in_file VARS_IN_FILE] [--filesfile FILESFILE] [--statafile STATAFILE] [--add2db ADD2DB] [--user USER] [--password PASSWORD] [--host HOST]
 
 Convert BHC files to verious formats.
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --pad PAD             Set path of your files.
+	-h, --help 
+	Show this help message and exit
+  
+  --pad PAD 
+  Set path of your files.
+  
   --bank_out_file BANK_OUT_FILE
-                        Set file name for banks output file. Enter 0 if not
-                        required. Default is "banks.csv".
+  Set file name for banks output file. Enter 0 if not required. Default is "banks.csv".
+
   --var_out_file VAR_OUT_FILE
-                        Set file name for variables output file. Enter 0 if
-                        not required. Default is "variables.csv".
-  --panelfile PANELFILE
-                        Set file name for panel file."panelfile.csv".
-  --vars_in_file VARS_IN_FILE
-                        Set file name for variables input file. Default is
-                        "bhc_vars.csv".
-  --filesfile FILESFILE
-                        Set file name for files input file. Default is
-                        "3banks.csv".
-  --statafile STATAFILE
-                        Set file name for stata output. Enter 0 if not
-                        required. Default is "panelfile.dta".
-  --add2db ADD2DB       Tell me if to output to mysql (1=yes, 2=no). Default
-                        is "0".
-  --user USER           The MySQL login username. Default is "root".
-  --password PASSWORD   The MySQL hashed login password, see
-                        http://stackoverflow.com/questions/157938/hiding-a
-                        -password-in-a-python-script
-  --host HOST           The MySQL host. Default is "localhost".
+  Set file name for variables output file. Enter 0 if not required. Default is "variables.csv".
+
+  --panelfile PANELFILE Set file name for panel file."panelfile.csv".
+
+  --vars_in_file VARS_IN_FILE Set file name for variables input file. Default is "bhc_vars.csv".
+
+  --filesfile FILESFILE Set file name for files input file. Default is "3banks.csv".
+
+  --statafile STATAFILE  Set file name for stata output. Enter 0 if not required. Default is "panelfile.dta".
+
+  --add2db ADD2DB	Tell me if to output to mysql (1=yes, 2=no). Default is "0".
+  
+  --user USER The MySQL login username. Default is "root".
+  --password PASSWORD The MySQL hashed login password, see http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script
+  
+  --host HOST The MySQL host. Default is "localhost".
