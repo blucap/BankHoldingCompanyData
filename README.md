@@ -19,7 +19,6 @@ The python script uses two input files:
 
 1) One csv file with the variable names that you want, see the example csv file (bhc_vars.csv).
 
-
 2) One csv file with the bhcf files that you want to process (3banks.csv). 
 
 OUTPUTS:
