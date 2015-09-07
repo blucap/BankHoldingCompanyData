@@ -35,7 +35,6 @@ def check_file_exists(longfname,rw):
 	return success
 
 def concat_pieces(pieces,fname,statafile,label,dblabel,add2db,user, password, host):
-	#add_frame_to_db(all_float_pieces,'FLOAT_VARS')
 	if len(pieces)>0:
 		df   = pd.concat(pieces, ignore_index=True)
 		df   = order(df,['RSSD9001', 'RSSD9999', 'year', 'qid'])
@@ -64,6 +63,7 @@ def add_frame_to_db(frame, table, user, password, host):
 def add_to_db(frame,table,user, password, host):
 	db = MySQLdb.connect(user=user, passwd=password, db="BHC")
 	frame.to_sql(con=db, name=table, if_exists='replace', flavor='mysql',index=False)
+	#In case you use older vrsion of pandas
 	#fram2 = frame.astype(object).where(pd.notnull(frame), None)
 	#frame[:1].to_sql(con=db, name=table, if_exists='replace', flavor='mysql',index=False)
 	#fram2[1:].to_sql(con=db, name=table, if_exists='append', flavor='mysql',index=False)
