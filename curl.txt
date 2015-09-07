@@ -1,0 +1,4 @@
+# https://www.chicagofed.org/api/sitecore/BHCHome/GetFile?SelectedQuarter=Q&SelectedYear=YYYY
+curl -k -o "bhcdata_#1_#2.zip" "https://www.chicagofed.org/api/sitecore/BHCHome/GetFile?SelectedQuarter=[1-4]&SelectedYear=[1985-2015]"
+
+
