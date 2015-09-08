@@ -132,6 +132,19 @@ def read_vars(pad,fname,up):
 					columns.append(a)
 	return columns
 
+def skip_bad_file(fname):
+	f = open(fname,"r")
+	lines = f.readlines()
+	f.close()
+	g = open(fname,"w")
+	for line in lines:
+			data = line.split('^')
+			if data[0]!="1115406":
+				g.write(line)
+			else:
+				print colored("\nSkipped the bad line in 2003 Q 1.\n", 'red')
+	g.close()
+
 def main(pad, path, bank_out_file, var_out_file, panelfile, vars_in_file, filesfile, statafile, add2db, user, password, host):
 	banks=[]
 	variables=[]
@@ -161,8 +174,13 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, vars_in_file, filesf
 			fname=pad+naam
 		else:
 			fname=naam
-		print(fname)
+		print("File: "+fname),
 		if check_file_exists(fname,"r"):
+			if "bhcf0303.txt" in fname:
+				print colored("-", 'red')
+				skip_bad_file(fname)
+			else:
+				print "+"			
 			f = open(fname,'r')
 			filecount+=1
 			with f:
