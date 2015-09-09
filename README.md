@@ -15,6 +15,8 @@ The script relies on pandas for python. Please update pandas to the latest versi
 INPUTS:
 Please run the curl script and unzip the files in the folder where the python script resides is.
 
+Make sure the "vars.pl"" script and the "Micro Data Reference Manual.html" are in the folder where your python script resides.
+
 The python script uses two input files:
 
 1) One csv file with the variable names that you want, see the example csv file (bhc_vars.csv).
