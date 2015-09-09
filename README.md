@@ -95,3 +95,4 @@ Optional arguments:
 
   --host HOST 
   The MySQL host. Default is "localhost".
+  
