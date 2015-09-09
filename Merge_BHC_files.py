@@ -7,7 +7,7 @@ pd.set_option('display.max_columns', None)
 import base64
 import MySQLdb
 import warnings 
-import sys
+import sys, string, subprocess
 import argparse
 from sys import platform as _platform
 # suppress annoying mysql warnings
@@ -34,6 +34,19 @@ def check_file_exists(longfname,rw):
 			success=False
 	return success
 
+def makelables(df,statafile):
+	dof=statafile[:-4]+".do"
+	if check_file_exists(dof,"w"):
+		labeldic=lables()
+		f = open(dof, 'w')
+		for item in list(df):
+			key = item[4:]
+			if key in labeldic:
+				#print ('label variable %s "%s"') % (item, labeldic[key])
+				line = 'label variable ' + item + ' "'+labeldic[key]+'"\n' 
+				f.write(line)
+		f.close()
+
 def concat_pieces(pieces,fname,statafile,label,dblabel,add2db,user, password, host):
 	if len(pieces)>0:
 		df   = pd.concat(pieces, ignore_index=True)
@@ -42,7 +55,8 @@ def concat_pieces(pieces,fname,statafile,label,dblabel,add2db,user, password, ho
 		if statafile!="0": 
 			if check_file_exists(statafile,"w"):
 				df.to_stata(statafile)
-		print '\nLabel %s has a count of %s.' % (label, df["qid"].count())
+				makelables(df,statafile)
+		print '\n%s has a count of %s.' % (label, df["qid"].count())
 		if add2db==1:
 			add_frame_to_db(df,  dblabel.upper(), user, password, host)
 	else:
@@ -63,7 +77,7 @@ def add_frame_to_db(frame, table, user, password, host):
 def add_to_db(frame,table,user, password, host):
 	db = MySQLdb.connect(user=user, passwd=password, db="BHC")
 	frame.to_sql(con=db, name=table, if_exists='replace', flavor='mysql',index=False)
-	#In case you use older vrsion of pandas
+	#In case you use older version of pandas
 	#fram2 = frame.astype(object).where(pd.notnull(frame), None)
 	#frame[:1].to_sql(con=db, name=table, if_exists='replace', flavor='mysql',index=False)
 	#fram2[1:].to_sql(con=db, name=table, if_exists='append', flavor='mysql',index=False)
@@ -144,12 +158,27 @@ def skip_bad_file(fname):
 			else:
 				print colored("\nSkipped the bad line in 2003 Q 1.\n", 'red')
 	g.close()
+	
+def lables():
+    labeldic={}
+    output = subprocess.check_output(['perl', 'vars.pl'])
+    output = output.splitlines(True)
+    patterns = ['(\d{4}-\d{2}-\d{2}\sto\s\d{4}-\d{2}-\d{2})']
+    for line in output:
+        for pattern in patterns:
+            if not re.search(pattern,  line):
+                words=line.split(',')
+                key= words[0].strip()
+                value=string.capwords(words[1].strip())
+                if key not in labeldic:
+                    labeldic[key]=value
+                    #print "Key: %s Value: %s" % (key, labeldic[key])
+    return labeldic
 
 def main(pad, path, bank_out_file, var_out_file, panelfile, vars_in_file, filesfile, statafile, add2db, user, password, host):
 	banks=[]
 	variables=[]
 	all_pieces=[]
-
 	filecount=0
 	tot_filecount=0
 
@@ -180,7 +209,7 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, vars_in_file, filesf
 				print colored("-", 'red')
 				skip_bad_file(fname)
 			else:
-				print "+"			
+				print "+"
 			f = open(fname,'r')
 			filecount+=1
 			with f:
