@@ -3,7 +3,7 @@ BankHoldingCompanyData
 
 I wrote this python script to help download data from the Chicago Federal reserve, specifically from Reporting Form FR Y-9C.
 
-The script downloads the data for all years (if you want to), and then merges the files. It creates STATA output, a CSV file, and it can send the data to MYSQL.
+The script processes the data for all years (if you want to), and then merges the files. It creates STATA output, a CSV file, and it can send the data to MYSQL.
 
 See this page for the source of the data:
 
