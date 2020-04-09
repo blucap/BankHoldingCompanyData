@@ -5,14 +5,15 @@ import pandas as pd
 from termcolor import colored
 pd.set_option('display.max_columns', None)
 import base64
-import MySQLdb
+#import MySQLdb
 import warnings
 import sys, string, subprocess
 import argparse
-import feather
+#import feather
 from sys import platform as _platform
 # suppress annoying mysql warnings
-warnings.filterwarnings(action='ignore', category=MySQLdb.Warning)
+# warnings.filterwarnings(action='ignore', category=MySQLdb.Warning)
+
 
 def ops():
     if _platform == "linux" or _platform == "linux2":
@@ -21,10 +22,11 @@ def ops():
         opersys = "darwin"
     elif _platform == "win32":
         opersys = "win"
-    return opersys
+    return(opersys)
+
 
 def check_file_exists(longfname,rw):
-    success=False
+    success = False
     if rw in ["r","w"]:
         try:
             f = open(longfname, rw)
@@ -33,59 +35,82 @@ def check_file_exists(longfname,rw):
         except:
             print('\nFilename is not valid: %s') % longfname
             success=False
-    return success
+    return(success)
 
-def makelables(df,statafile):
-    dof=statafile[:-4]+".do"
-    if check_file_exists(dof,"w"):
-        labeldic=lables()
-        labeldiR=rssd_lables()
-        labeldic.update(labeldiR)
+
+def makelables(dic, statafile):
+    dof = statafile[:-4] + ".do"
+    if check_file_exists(dof, "w"):
         f = open(dof, 'w')
-        for item in list(df):
-            if item[:4]=="RSSD":
-                key=item
-            else:
-                key = item[4:]
-            if key in labeldic:
-                #print ('Found key: %s, item: %s ') % (key, item)
-                #print ('label variable %s "%s"') % (item, labeldic[key])
-                line = 'label variable ' + item + ' "'+labeldic[key]+'"\n'
-                f.write(line)
-            else:
-                print ('Not found %s ') % (key)
+        for key, value in dic.items():
+            line = 'label variable ' + key + ' "' + value +'"\n'
+            # print(line)
+            f.write(line)
         f.close()
 
-def concat_pieces(pieces,fname,featherfile,statafile,label,dblabel,add2db,user, password, host):
+
+def makelable_dict(df):
+    lijst_df_rssd = list(set([x for x in list(df) if 'RSSD' in x]))
+    lijst_df_bhck = list(set([x[-4:] for x in list(df) if not 'year' in x and not 'qid' in x if not 'RSSD' in x]))
+
+    bhc_vars_mdrm_rssd_2020  = pd.read_csv('../bhc_vars_mdrm_rssd_2020.csv').drop_duplicates(subset=['item']).set_index('item')
+    bhc_vars_mdrm_FRY9C_2020 = pd.read_csv('../bhc_vars_mdrm_FRY9C_2020.csv').drop_duplicates(subset=['item']).set_index('item')
+
+    df_rssd = pd.DataFrame(index=lijst_df_rssd).join(bhc_vars_mdrm_rssd_2020['name']).dropna()
+    df_rssd.rename(columns={'name': 'label'}, inplace=True)
+    df_rssd.index.names = ['item']
+
+    df_FRY9C =pd.DataFrame(index=lijst_df_bhck).join(bhc_vars_mdrm_FRY9C_2020['description']).dropna()
+    df_FRY9C.index.names = ['item']
+
+    df_lables = pd.DataFrame(list(set([x for x in list(df) if not 'year' in x and not 'qid' in x if not 'RSSD' in x])), columns = ['long_key'])
+    df_lables['item'] = df_lables['long_key'].str[-4:]
+    df_lables.set_index('item', inplace=True)
+    df_lables = df_lables.join(df_FRY9C).reset_index()
+    df_lables = df_lables[['long_key', 'description']].set_index('long_key')
+    df_lables.index.names = ['item']
+    df_lables.rename(columns={'description': 'label'}, inplace=True)
+    df_lables =  df_lables.append(df_rssd)
+    df_lables['label'] = df_lables['label'].str[:79]
+    df_lables = df_lables.to_dict()
+    return(df_lables['label'])
+
+
+def concat_pieces(pieces, fname, featherfile, statafile, label, dblabel, add2db, user, password, host):
     #add_frame_to_db(all_float_pieces,'FLOAT_VARS')
     if len(pieces)>0:
         df   = pd.concat(pieces, ignore_index=True, sort=False) #changed  20180716 (sort=False)
         df   = order(df,['RSSD9001', 'RSSD9999', 'year', 'qid'])
-        df.to_csv(fname, index=False, sep="^")
-        feather.write_dataframe(df, featherfile)
-        if statafile!="0":
+        df.to_csv(fname, index=False, sep="^", compression='gzip')
+        df.to_feather(featherfile)
+        # xxxx feather.write_dataframe(df, featherfile)
+        if statafile != "0":
             if check_file_exists(statafile,"w"):
-                df.to_stata(statafile)
-                makelables(df,statafile)
-        print '\n%s has a count of %s.' % (label, df["qid"].count())
+                df.to_stata(statafile, version=119)
+                makelables(makelable_dict(df),statafile)
+        print('\n%s has a count of %s.' % (label, df["qid"].count()))
         if add2db==1:
             add_frame_to_db(df,  dblabel.upper(), user, password, host)
     else:
-        print label+"leeg"
+        print(label+"leeg")
+    return(df)
 
-def order(frame,var):
-    varlist =[w for w in frame.columns if w not in var]
-    frame = frame[var+varlist]
-    return frame
+
+def order(frame, var):
+    varlist = [w for w in frame.columns if w not in var]
+    frame = frame[var + varlist]
+    return(frame)
+
 
 def add_frame_to_db(frame, table, user, password, host):
-    add_to_db(frame,table,user, password, host)
+    add_to_db(frame, table, user, password, host)
     lijstje=[]
     for litem in list(frame):
         lijstje.append(litem)
-    modify_col_type(lijstje, table, frame,user, password, host)
+    modify_col_type(lijstje, table, frame, user, password, host)
 
-def add_to_db(frame,table,user, password, host):
+
+def add_to_db(frame,table, user, password, host):
     db = MySQLdb.connect(user=user, passwd=password, db="BHC")
     frame.to_sql(con=db, name=table, if_exists='replace', flavor='mysql',index=False)
     #fram2 = frame.astype(object).where(pd.notnull(frame), None)
@@ -111,12 +136,13 @@ def modify_col_type(head_list, table_name, frame,user, password, host):
         if int(str(frame[hitem].dtype).find("float"))>-1:
             sqlstring= "ALTER TABLE "+table_name+" MODIFY "+hitem.lower()+" double"
         if "sqlstring" in locals():
-            print sqlstring
+            print(sqlstring)
             try:
                 db.query(sqlstring)
                 ## db.query("""ALTER TABLE `BHC_BHCK2170` MODIFY year int(5)""")
             except:
                 pass
+
 
 def delfile(file_to_delete):
     if file_to_delete!="0":
@@ -124,6 +150,7 @@ def delfile(file_to_delete):
             os.remove(file_to_delete)
         except:
             pass
+
 
 def writefilesorted(list_to_write, pad, file_to_write):
     if file_to_write!="0":
@@ -134,25 +161,23 @@ def writefilesorted(list_to_write, pad, file_to_write):
                 g.write("%s\n" % item)
             g.close()
 
-def qtr(x):
-    return {
-            '0331': 1,
-            '0630': 2,
-            '0930': 3,
-            '1231': 4,
-    }[x]
 
-def read_vars(pad,fname,up):
+def qtr(x):
+    return {'0331': 1, '0630': 2, '0930': 3, '1231': 4}[x]
+
+
+def read_vars(pad, fname, up):
     columns=[]
-    if check_file_exists(pad+fname,"r"):
-        for line in open(pad+fname, 'r'):
+    if check_file_exists(pad + fname,"r"):
+        for line in open(pad + fname, 'r'):
             for item in line.split(','):
                 a = item.strip()
                 if up=="U":
                     a=a.upper()
-                if a not in columns and len(a)>0:
+                if a not in columns and len(a) > 0:
                     columns.append(a)
-    return columns
+    return(columns)
+
 
 def skip_bad_file(fname):
     with open(fname) as f:
@@ -160,11 +185,12 @@ def skip_bad_file(fname):
     g = open(fname,"w")
     for line in lines:
         data = line.split('^')
-        if data[0]!="1115406":
+        if data[0] != "1115406":
             g.write(line)
         else:
-            print colored("\nSkipped the bad line in 2003 Q 1.\n", 'red')
+            print(colored("\nSkipped the bad line in 2003 Q 1.\n", 'red'))
     g.close()
+
 
 def lables():
     labeldic={}
@@ -180,7 +206,8 @@ def lables():
                 if key not in labeldic:
                     labeldic[key]=value
                     #print "Key: %s Value: %s" % (key, labeldic[key])
-    return labeldic
+    return(labeldic)
+
 
 def rssd_lables():
     labeldic={}
@@ -196,9 +223,9 @@ def rssd_lables():
                 if key not in labeldic:
                     labeldic[key]=value
                     #print "Key: %s Value: %s" % (key, labeldic[key])
-    return labeldic
+    return(labeldic)
 
-#   main(pad, path, bank_out_file, var_out_file, panelfile,              vars_in_file, filesfile, statafile, add2db, user, password, host):
+
 def main(pad, path, bank_out_file, var_out_file, panelfile, featherfile, vars_in_file, filesfile, statafile, add2db, user, password, host):
     banks=[]
     variables=[]
@@ -207,46 +234,45 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, featherfile, vars_in
     tot_filecount=0
 
     #Clean files
-    delfile(pad+bank_out_file)
-    delfile(pad+var_out_file)
+    delfile(pad + bank_out_file)
+    delfile(pad + var_out_file)
 
-    tgt_list=read_vars(pad, vars_in_file,"U")
+    tgt_list=read_vars(pad, vars_in_file, "U")
 
-    if check_file_exists(pad+filesfile,"r"):
-        lyst = read_vars(pad, filesfile,"L")
+    if check_file_exists(pad+filesfile, "r"):
+        lyst = read_vars(pad, filesfile, "L")
         add_pad = 1
     else:
         lyst=sorted(glob.glob(path))
         add_pad = 0
 
+    tot_filecount=len(lyst)
+    print(('\nTotal number of files submitted: %s.\n') % tot_filecount)
     for naam in lyst:
-        tot_filecount+=1
-    print ('\nTotal number of files submitted: %s.\n') % tot_filecount
-    for naam in lyst:
-        if add_pad==1:
-            fname=pad+naam
+        if add_pad == 1:
+            fname = pad + naam
         else:
             fname=naam
-        print("File: "+fname),
-        if check_file_exists(fname,"r"):
+        print("File: " + fname, end='')
+        if check_file_exists(fname, "r"):
             if "bhcf0303.txt" in fname:
-                print colored("-", 'red')
+                print(colored("-", 'red'))
                 skip_bad_file(fname)
             else:
-                print "+"
-            f = open(fname,'r')
-            filecount+=1
+                print("+")
+            f = open(fname, 'r')
+            filecount += 1
             with f:
                 word= f.readline().upper().split('^')
-                if word[0]=="RSSD9001":
-                    idx=0
-                if word[1]=="RSSD9001":
-                    idx=1
+                if word[0] == "RSSD9001":
+                    idx = 0
+                if word[1] == "RSSD9001":
+                    idx = 1
                 #some files have dashes on line 2, but not all files
-                rowcount=0
+                rowcount = 0
                 for line in f:
                     data = line.split('^')
-                    if data[0]!="--------":
+                    if data[0] != "--------":
                         if data[idx] not in banks:
                             banks.append(data[idx])
                     else:
@@ -254,61 +280,62 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, featherfile, vars_in
             f.close()
             #Read date in frame, use the idx to make sure the right rows are imported
             # For presice I set parse_dates=False, infer_datetime_format=False
-            if rowcount !=0:
-                dfr = pd.read_csv(fname, sep='^', low_memory=False, parse_dates=False, infer_datetime_format=False, skiprows=[rowcount], engine="c")
+            if rowcount != 0:
+                dfr = pd.read_csv(fname, sep='^', encoding = "ISO-8859-1", low_memory=False, parse_dates=False, infer_datetime_format=False, skiprows=[rowcount], engine="c")
             else:
-                dfr = pd.read_csv(fname, sep='^', low_memory=False, parse_dates=False, infer_datetime_format=False, engine="c")
+                dfr = pd.read_csv(fname, sep='^', encoding = "ISO-8859-1", low_memory=False, parse_dates=False, infer_datetime_format=False, engine="c")
             #Set vars to upper case
             for item in list(dfr):
-                if not item==item.upper():
+                if not item == item.upper():
                     dfr = dfr.rename(columns={item: item.upper()})
                 if item not in variables:
                     variables.append(item)
             #All variables of the frame are here:
-            var_list=list(dfr)
+            var_list = list(dfr)
             #Assing the main id variables
             dfr['year'] = int(str(dfr["RSSD9999"].loc[0])[0:4])
             dfr['qid']  = qtr(str(dfr["RSSD9999"].loc[0])[4:9])
 
-            print 'Rowcount:  %2s, Cell 1: %10s. Cell 2: %10s. Cell 3: %10s.' %  (rowcount, var_list[0], var_list[1], var_list[2]),
-            print 'RSSD9999:',
-            print colored(dfr["RSSD9999"].loc[0], 'red'),
-            print 'Year: %5s. Qtr: %2s. Count %4s. Vars: %5s' %  (dfr["year"].loc[0], dfr["qid"].loc[0], dfr["RSSD9001"].count(), len(var_list)),
-            print 'Banks: %5s.' %  len(banks),
-            print 'Variables: %5s.' %  len(variables),
-            print 'Filecount: %4s of %4s.\n' %  (filecount, tot_filecount)
+            print('Rowcount:  %2s, Cell 1: %10s. Cell 2: %10s. Cell 3: %10s.' %  (rowcount, var_list[0], var_list[1], var_list[2]), end='')
+            print(' RSSD9999: ', end = '')
+            print(colored(dfr["RSSD9999"].loc[0], 'red'), end = '')
+            print(' Year: %5s. Qtr: %2s. Count %4s. Vars: %5s' %  (dfr["year"].loc[0], dfr["qid"].loc[0], dfr["RSSD9001"].count(), len(var_list)), end='')
+            print(' Banks: %5s.' %  len(banks), end='')
+            print(' Variables: %5s.' %  len(variables), end='')
+            print(' Filecount: %4s of %4s.\n' %  (filecount, tot_filecount), end='')
 
             tmp_list=['RSSD9001', 'RSSD9999', 'year', 'qid']
             for item in tgt_list:
                 if item in var_list:
                     if item not in tmp_list:
                         tmp_list.append(item)
-                        print colored(item, 'green'),
+                        print(colored(item + " ", 'green'), end = '')
                 else:
-                    print colored(item, 'red'),
-            print "\n"
-            dfr=dfr[tmp_list]
+                    print(colored(item + " ", 'red'), end = '')
+            print("\n")
+            dfr = dfr[tmp_list]
             all_pieces.append(dfr)
         else:
             print("\nThis BHC file is missing:"),
-            print colored(fname, 'red'),
-            print "I will skip.\n"
+            print(colored(fname, 'red'), end='')
+            print("I will skip.\n")
             filecount+=1
 
-    concat_pieces(all_pieces,panelfile,featherfile,statafile,'Panel','PANEL_VARS',add2db, user, password, host)
+    df = concat_pieces(all_pieces, panelfile, featherfile, statafile, 'Panel', 'PANEL_VARS', add2db, user, password, host)
 
-    print "Totals"
-    print 'Banks:    %s.' % len(banks)
-    print 'Variables: %s.' % len(variables)
-    print "\n"
+    print("Totals")
+    print('Banks:    %s.' % len(banks))
+    print('Variables: %s.' % len(variables))
+    print("\n")
 
     #Now write to files
-    writefilesorted(banks,   pad, bank_out_file)
+    writefilesorted(banks,     pad, bank_out_file)
     writefilesorted(variables, pad, var_out_file)
-    banks_dfr=pd.DataFrame(banks, columns=['RSSD9001'], dtype="int64")
     if add2db==1:
+        banks_dfr=pd.DataFrame(banks, columns=['RSSD9001'], dtype="int64")
         add_frame_to_db(banks_dfr,'BANK_IDS', user, password, host)
-    print "\nDone!"
+    print("\nDone!")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert BHC files to various formats.')
@@ -322,7 +349,7 @@ if __name__ == '__main__':
     parser.add_argument('--statafile',      dest='statafile',       default='panelfile.dta',        help='Set file name for stata output. Enter 0 if not required. Default is "panelfile.dta".')
     parser.add_argument('--add2db',         dest='add2db',          default= 0,                     help='Tell me if to output to mysql (1=yes, 0=no). Default  is "0".')
     parser.add_argument('--user',           dest='user',            default='root',                 help='The MySQL login username. Default is "root".')
-    parser.add_argument('--password', 		dest='password', 		default='',					    help='The MySQL hashed login password, see http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script')
+    parser.add_argument('--password',       dest='password',        default="PyprbHVtcHRlcm9w",     help='The MySQL hashed login password, see http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script')
     parser.add_argument('--host',           dest='host',            default='localhost',            help='The MySQL host. Default is "localhost".')
     args = parser.parse_args(sys.argv[1:])
     if not args.pad:
@@ -347,3 +374,4 @@ if __name__ == '__main__':
 
     password = base64.b64decode(args.password)
     main(pad, path, args.bank_out_file, args.var_out_file, args.panelfile, args.featherfile, args.vars_in_file, args.filesfile, args.statafile, add2db, args.user, password, args.host)
+
