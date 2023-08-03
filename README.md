@@ -1,7 +1,5 @@
 # BankHoldingCompanyData
 
----
-
 I wrote this python script to help download data from the Chicago Federal reserve, specifically from Reporting Form FR Y-9C.
 
 The script processes the data for all years (if you want to), and then merges the files. It creates STATA output, a CSV file, and a feather data file.
