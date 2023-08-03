@@ -6,13 +6,15 @@ I wrote this python script to help download data from the Chicago Federal reserv
 
 The script processes the data for all years (if you want to), and then merges the files. It creates STATA output, a CSV file, and a feather data file.
 
-See this page for the [origins of the data](https://www.chicagofed.org/banking/financial-institution-reports/bhc-data): 
+See this page for the [origins of the data](https://www.chicagofed.org/banking/financial-institution-reports/bhc-data).
 
 
 **PYTHON**
+
 The script relies on pandas for python. Please update pandas and python to the latest version. Make sure you import the relevant modules.
 
 **INPUTS:**
+
 In  the past one would run the curl script and unzip the files in the folder where the python script resides is.
 
 Since a couple of years you should get the data from: [NIC National Information Center](https://www.ffiec.gov/npw/FinancialReport/FinancialDataDownload)
@@ -24,6 +26,7 @@ The python script uses two input files:
 2) One csv file with the bhcf files that you want to process (lyst3.csv). 
 
 **OUTPUTS:**
+
 The python script produces various outputs:
 
 panelfile.csv.gz (this is a compressed csv file to save space and can be opened in pandas without unpacking)
