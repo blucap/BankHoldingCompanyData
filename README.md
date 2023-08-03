@@ -6,15 +6,16 @@ I wrote this python script to help download data from the Chicago Federal reserv
 
 The script processes the data for all years (if you want to), and then merges the files. It creates STATA output, a CSV file, and a feather data file.
 
-See this page for the source of the data:
+See this page for the [origins of the data](https://www.chicagofed.org/banking/financial-institution-reports/bhc-data): 
 
-https://www.chicagofed.org/banking/financial-institution-reports/bhc-data
 
 **PYTHON**
-The script relies on pandas for python. Please update pandas and python to the latest version.
+The script relies on pandas for python. Please update pandas and python to the latest version. Make sure you import the relevant modules.
 
 **INPUTS:**
-Please run the curl script and unzip the files in the folder where the python script resides is.
+In  the past one would run the curl script and unzip the files in the folder where the python script resides is.
+
+Since a couple of years you should get the data from: [NIC National Information Center](https://www.ffiec.gov/npw/FinancialReport/FinancialDataDownload)
 
 The python script uses two input files:
 
@@ -25,7 +26,7 @@ The python script uses two input files:
 **OUTPUTS:**
 The python script produces various outputs:
 
-panelfile. csv
+panelfile.csv.gz (this is a compressed csv file to save space and can be opened in pandas without unpacking)
 
 banks.csv
 
@@ -48,8 +49,11 @@ Else you can specify your own settings.
 
 USAGE: 
 
-    Merge_BHC_files.py [-h] [--pad PAD] [--bank_out_file BANK_OUT_FILE] [--var_out_file VAR_OUT_FILE] [--panelfile PANELFILE] [--featherfile FEATHERFILE] [--vars_in_file VARS_IN_FILE] [--filesfile FILESFILE] [--statafile STATAFILE] [--add2db ADD2DB] [--user USER] [--password PASSWORD] [--host HOST]
+    python Merge_BHC_files.py [-h] [--pad PAD] [--bank_out_file BANK_OUT_FILE] [--var_out_file VAR_OUT_FILE] [--panelfile PANELFILE] [--featherfile FEATHERFILE] [--vars_in_file VARS_IN_FILE] [--filesfile FILESFILE] [--statafile STATAFILE] 
 
+Example:
+                                 
+    python Merge_BHC_files.py  --panelfile 'panelfile_2023.csv' --statafile 'panelfile_2023.dta'  --featherfile 'panelfile_2023.feather'
 
 Optional arguments:
 
@@ -58,7 +62,6 @@ Optional arguments:
 
     --pad PAD
 
- 
 Set path of your files.
 
     --bank_out_file BANK_OUT_FILE
@@ -73,7 +76,6 @@ Set file name for variables output file. Enter 0 if not required. Default is "va
 
 Set file name for panel file. Default is "panelfile.csv".
   
-
     --featherfile FEATHERFILE  
 
 Default = "panelfile.feather"
@@ -89,20 +91,4 @@ Set file name for files input file. Default is "lyst3.csv".
     --statafile STATAFILE 
 
 Set file name for stata output. Enter 0 if not required. Default is "panelfile.dta".
-
-    --add2db ADD2DB 
-
-Tell me if to output to mysql (1=yes, 2=no). Default is "0". (Deprecated)
-
-    --user USER 
-
-The MySQL login username. Default is "root". (Deprecated)
-
-    --password PASSWORD 
-
-  The MySQL hashed login password, see http://stackoverflow.com/questions/157938/hiding-a-password-in-a-python-script (Deprecated)
-
-    --host HOST 
-
-The MySQL host. Default is "localhost". (Deprecated)
 
