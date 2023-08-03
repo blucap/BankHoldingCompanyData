@@ -13,15 +13,17 @@ The script relies on pandas for python. Please update pandas and python to the l
 
 **INPUTS:**
 
-In  the past one would run the curl script and unzip the files in the folder where the python script resides is.
+In the past one would run the curl script and unzip the files in the folder where the python script resides is.
 
 Since a couple of years you should get the data from: [NIC National Information Center](https://www.ffiec.gov/npw/FinancialReport/FinancialDataDownload)
 
-The python script uses two input files:
+The python script uses three input files:
 
 1) One csv file with the variable names that you want, see the example csv file (bhc_vars.csv).
 
 2) One csv file with the bhcf files that you want to process (lyst3.csv). 
+
+3) The MDMR file with data definitions: [Micro Data Reference Manual](https://www.federalreserve.gov/apps/mdrm/download_mdrm.htm), which you need to unzip.
 
 **OUTPUTS:**
 

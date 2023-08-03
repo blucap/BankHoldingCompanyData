@@ -23,7 +23,7 @@ def makelable_dict(df):
     lijst_df_rssd = list(set([x for x in list(df) if 'RSSD' in x]))
     lijst_df_bhck = list(set([x[-4:] for x in list(df) if not 'year' in x and not 'qid' in x if not 'RSSD' in x]))
 
-    dfd = pd.read_csv("../MDRM_CSV.csv", encoding="ISO-8859-1", low_memory=False, parse_dates=False, infer_datetime_format=False, skiprows=[0])
+    dfd = pd.read_csv("MDRM_CSV.csv", encoding="ISO-8859-1", low_memory=False, parse_dates=False, infer_datetime_format=False, skiprows=[0])
     dfd = dfd.loc[(dfd['Reporting Form'] == "FR Y-9C") | (dfd['Reporting Form'] == "FR Y-9C"), ['Mnemonic', 'Item Code', 'Item Name']]
     dfd = dfd.rename(columns={'Item Code': 'item', 'Item Name': 'label', 'Mnemonic': 'mnem'}).drop_duplicates(subset=['item'])#.set_index('item')
     dfd = dfd.assign(long_mnem = dfd.mnem + dfd.item)
