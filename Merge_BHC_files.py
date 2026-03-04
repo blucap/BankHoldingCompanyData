@@ -45,14 +45,14 @@ def makelable_dict(df):
 # df_lables = makelable_dict(df)
 
 
-def concat_pieces(pieces, fname, featherfile, statafile, label):
+def concat_pieces(pieces, fname, parquetfile, statafile, label):
     if len(pieces) > 0:
         df   = pd.concat(pieces, ignore_index=True, sort=False)  # changed  20180716 (sort=False)
         df   = order(df, ['RSSD9001', 'RSSD9999', 'year', 'qid'])
         print('Writing to cvs.gz')
         df.to_csv(fname + '.gz', index=False, sep="^", compression='gzip')
-        print('Writing to featherfile')
-        df.to_feather(featherfile)
+        print('Writing to parquetfile')
+        df.to_parquet(parquetfile)
         if statafile != "0":
             print('Writing to Stata')
             df.to_stata(statafile, version=119, variable_labels=makelable_dict(df))
@@ -107,7 +107,7 @@ def skip_bad_file(fname):
 
 
 #   main(pad, path, bank_out_file, var_out_file, panelfile,              vars_in_file, filesfile, statafile, add2db, user, password, host):
-def main(pad, path, bank_out_file, var_out_file, panelfile, featherfile, vars_in_file, filesfile, statafile):  # , add2db, user, password, host):
+def main(pad, path, bank_out_file, var_out_file, panelfile, parquetfile, vars_in_file, filesfile, statafile):  # , add2db, user, password, host):
     banks = []
     variables = []
     all_pieces = []
@@ -137,7 +137,7 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, featherfile, vars_in
                 skip_bad_file(fname)
             else:
                 print("+")
-            f = open(fname, 'r')
+            f = open(fname, 'r', encoding='ISO-8859-1')  # changed to feature the encoding because of an error thrown in the 202409 file
             filecount += 1
             with f:
                 word = f.readline().upper().split('^')
@@ -198,7 +198,7 @@ def main(pad, path, bank_out_file, var_out_file, panelfile, featherfile, vars_in
             print("I will skip.\n")
             filecount += 1
 
-    df = concat_pieces(all_pieces, panelfile, featherfile, statafile, 'Panel')
+    df = concat_pieces(all_pieces, panelfile, parquetfile, statafile, 'Panel')
 
     print("Totals")
     print('Banks:    %s.' % len(banks))
@@ -218,7 +218,7 @@ if __name__ == '__main__':
     parser.add_argument("-bank_out_file", "--bank_out_file",    default='banks.csv', help='Set file name for banks output file. Enter 0 if not required. Default is "banks.csv".')
     parser.add_argument("-var_out_file",  "--var_out_file",     default='variables.csv', help='Set file name for variables output file. Enter 0 if not required. Default is "variables.csv".')
     parser.add_argument("-panelfile",  "--panelfile",           default='panelfile.csv', help='Set file name for panel file. "panelfile.csv".')
-    parser.add_argument("-featherfile",  "--featherfile",       default='panelfile.feather', help='Set file name for feather file. "panelfile.feather".')
+    parser.add_argument("-parquetfile",  "--parquetfile",       default='panelfile.parquet', help='Set file name for parquet file. "panelfile.parquet".')
     parser.add_argument("-vars_in_file",  "--vars_in_file",     default='bhc_vars.csv', help='Set file name for variables input file. Default is "bhc_vars.csv".')
     parser.add_argument("-filesfile",  "--filesfile",           default='lyst3.csv', help='Set file name for files input file. Default is "lyst3.csv".')
     parser.add_argument("-statafile",  "--statafile",           default='panelfile.dta', help='Set file name for stata output. Enter 0 if not required. Default is "panelfile.dta".')

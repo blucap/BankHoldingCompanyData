@@ -29,13 +29,14 @@ The python script uses three input files:
 
 The python script produces various outputs:
 
-panelfile.csv.gz (this is a compressed csv file to save space and can be opened in pandas without unpacking)
+- panelfile.csv.gz (this is a compressed csv file to save space and can be opened in pandas without unpacking)
 
-banks.csv
+- banks.csv
 
-variables.csv
+- variables.csv
 
-panelfile.dta (for STATA), which you can elect to switch off, see below.
+- panelfile.dta (for STATA), which you can elect to switch off, see below.
+
 
 **Particulars:**
 
@@ -52,11 +53,11 @@ Else you can specify your own settings.
 
 USAGE: 
 
-    python Merge_BHC_files.py [-h] [--pad PAD] [--bank_out_file BANK_OUT_FILE] [--var_out_file VAR_OUT_FILE] [--panelfile PANELFILE] [--featherfile FEATHERFILE] [--vars_in_file VARS_IN_FILE] [--filesfile FILESFILE] [--statafile STATAFILE] 
+    python Merge_BHC_files.py [-h] [--pad PAD] [--bank_out_file BANK_OUT_FILE] [--var_out_file VAR_OUT_FILE] [--panelfile PANELFILE] [--parquetfile PARQUETFILE] [--vars_in_file VARS_IN_FILE] [--filesfile FILESFILE] [--statafile STATAFILE] 
 
 Example:
                                  
-    python Merge_BHC_files.py  --panelfile 'panelfile_2023.csv' --statafile 'panelfile_2023.dta'  --featherfile 'panelfile_2023.feather'
+    python Merge_BHC_files.py  --panelfile 'panelfile_2026.csv' --statafile 'panelfile_2026.dta'  --parquetfile 'panelfile_2023.parquet'
 
 Optional arguments:
 
@@ -78,10 +79,10 @@ Set file name for variables output file. Enter 0 if not required. Default is "va
     --panelfile PANELFILE 
 
 Set file name for panel file. Default is "panelfile.csv".
-  
-    --featherfile FEATHERFILE  
 
-Default = "panelfile.feather"
+    --parquetfile PARQUETFILE
+
+Default = "panelfile.parquet"
 
     --vars_in_file VARS_IN_FILE 
 
