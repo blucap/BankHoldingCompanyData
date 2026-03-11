@@ -4,6 +4,8 @@ zip
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+.gitignore
+*.gitignore
 
 # C extensions
 *.so
@@ -59,3 +61,10 @@ docs/_build/
 # PyBuilder
 target/
 /.Rhistory
+/.idea/.gitignore
+/.idea/BankHoldingCompanyData.iml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/other.xml
+/.idea/vcs.xml
